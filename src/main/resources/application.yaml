@@ -8,7 +8,7 @@ spring:
   # DB
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:delivery
+    url: jdbc:h2:mem:testdb
     username: sa
     password:
     hikari:
@@ -25,11 +25,14 @@ spring:
   # JPA
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
+        auto_quote_keyword: true
         format_sql: true
+        highlight_sql: true
     open-in-view: false
+    defer-datasource-initialization: true
 
 logging:
   level:
