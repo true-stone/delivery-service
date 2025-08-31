@@ -1,8 +1,19 @@
 package org.example.delivery.common.response.code;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+/**
+ * 에러 코드
+ * <pre>
+ * 응답 코드는 총 8자리
+ * 4-5XX(HTTP_STATUS_CODE), XX(SERVICE_CODE), XXX(CUSTOM_CODE)
+ *
+ * SERVICE_CODE
+ * - 00 : 공통
+ * </pre>
+ */
 @AllArgsConstructor
 public enum ErrorCode implements ResponseCode {
 

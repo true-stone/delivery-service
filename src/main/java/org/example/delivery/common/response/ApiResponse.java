@@ -47,11 +47,11 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> of(ResponseCode rc, T data) {
-        return of(rc, data, rc.getDescription());
+        return of(rc, data, null);
     }
 
     public static <T> ApiResponse<T> of(ResponseCode rc) {
-        return of(rc, null, rc.getDescription());
+        return of(rc, null, null);
     }
 
     /* =========================
@@ -65,8 +65,12 @@ public class ApiResponse<T> {
         return ResponseEntity.status(rc.getHttpStatus()).body(of(rc, data));
     }
 
-    public static <T> ResponseEntity<ApiResponse<T>> toEntity(ResponseCode rc) {
-        return ResponseEntity.status(rc.getHttpStatus()).body(of(rc));
+    public static <T> ResponseEntity<Object> toEntityObject(ErrorCode code) {
+        return ResponseEntity.status(code.getHttpStatus()).<Object>body(of(code));
+    }
+
+    public static ResponseEntity<Object> toEntityObject(ErrorCode code, String message) {
+        return ResponseEntity.status(code.getHttpStatus()).<Object>body(of(code, null, message));
     }
 
     /* =========================
@@ -90,5 +94,9 @@ public class ApiResponse<T> {
     // ❌ Error
     public static ResponseEntity<ApiResponse<Void>> error(ErrorCode ec) {
         return toEntity(ec, null);
+    }
+
+    public static ResponseEntity<ApiResponse<Void>> error(ErrorCode ec, String message) {
+        return toEntity(ec, null, message);
     }
 }
