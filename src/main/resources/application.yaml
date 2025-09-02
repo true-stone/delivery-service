@@ -34,6 +34,13 @@ spring:
     open-in-view: false
     defer-datasource-initialization: true
 
+# jwt
+security:
+  jwt:
+    secret: ${JWT_SECRET:nb3OdXITTBLQcZdAJgz5wBq2pmWP2TFwuwJyub8uVzQ=}
+    access-ttl-minutes: 30
+    refresh-ttl-days: 14
+
 logging:
   level:
     root: info
