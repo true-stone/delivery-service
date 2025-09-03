@@ -10,6 +10,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
@@ -170,19 +173,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * 커스텀/기타 예외
      * ================ */
 
-    @ExceptionHandler(RequestRejectedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleRequestRejectedException(RequestRejectedException e) {
-        log.warn("RequestRejectedException", e);
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
+        log.debug("AuthenticationException", ex);
 
-        return ApiResponse.error(ErrorCode.BAD_REQUEST);
+        if (ex instanceof UsernameNotFoundException) {
+            log.info("아이디가 일치하지 않음");
+            return ApiResponse.error(ErrorCode.UNAUTHORIZED_LOGIN_FAILED);
+        } else if (ex instanceof BadCredentialsException) {
+            log.info("비밀번호가 일치하지 않음");
+            return ApiResponse.error(ErrorCode.UNAUTHORIZED_LOGIN_FAILED);
+        }
+
+        return ApiResponse.error(ErrorCode.UNAUTHORIZED);
     }
 
     // 비즈니스 예외 → 우리가 정의한 ErrorCode 반환
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
-        log.warn("BusinessException: {}", e.getMessage(), e);
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
+        log.warn("BusinessException: {}", ex.getMessage(), ex);
 
-        return ApiResponse.error(e.getErrorCode(), e.getMessage());
+        return ApiResponse.error(ex.getErrorCode(), ex.getMessage());
     }
 
     // 그 외 모든 예외 → INTERNAL_SERVER_ERROR

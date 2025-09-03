@@ -21,11 +21,15 @@ public enum ErrorCode implements ResponseCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "40000000", "잘못된 요청"),
 
     // ===============
-    // 403 Forbidden
+    // 401 Unauthorized
     // ===============
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40100000", "인증되지 않은 요청"),
     UNAUTHORIZED_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "40100001", "토큰이 만료되었습니다."),
     UNAUTHORIZED_TOKEN_ERROR(HttpStatus.UNAUTHORIZED, "40100002", "유효하지 않은 토큰입니다."),
+    UNAUTHORIZED_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "40101000", "아이디 또는 비밀번호가 일치하지 않음"),
+    // ===============
+    // 403 Forbidden
+    // ===============
     FORBIDDEN(HttpStatus.FORBIDDEN, "40300000", "접근 권한 없음"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "40400000", "리소스를 찾을 수 없음"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "40500000", "지원하지 않는 메서드"),

@@ -3,10 +3,16 @@ package org.example.delivery.service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.delivery.common.response.code.ErrorCode;
+import org.example.delivery.dto.request.LoginRequest;
 import org.example.delivery.dto.request.SignUpRequest;
+import org.example.delivery.dto.response.LoginResponse;
 import org.example.delivery.entity.User;
 import org.example.delivery.exception.BusinessException;
+import org.example.delivery.jwt.JwtProvider;
 import org.example.delivery.repository.UserRepository;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationProvider authenticationProvider;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signUp(@Valid SignUpRequest request) {
@@ -38,5 +47,22 @@ public class AuthService {
             .build();
 
         userRepository.save(user);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            request.username(), request.password());
+        Authentication authenticate = authenticationProvider.authenticate(authenticationToken);
+
+        // AccessToken 토큰 생성
+        String accessToken = jwtProvider.generateAccessToken(authenticate);
+
+        // TODO 리프레시 토큰 추가
+
+        return LoginResponse.builder()
+            .grantType(JwtProvider.TOKEN_PREFIX)
+            .accessToken(accessToken)
+            .build();
     }
 }
