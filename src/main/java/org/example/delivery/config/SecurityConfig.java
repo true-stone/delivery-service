@@ -1,6 +1,10 @@
 package org.example.delivery.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.delivery.common.response.ApiResponse;
+import org.example.delivery.common.response.code.ErrorCode;
 import org.example.delivery.jwt.JwtAccessDeniedHandler;
 import org.example.delivery.jwt.JwtAuthenticationEntryPoint;
 import org.example.delivery.jwt.JwtAuthenticationFilter;
@@ -18,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.RequestRejectedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -29,6 +34,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -52,7 +58,7 @@ public class SecurityConfig {
 
             // 엔드포인트 권한 설정
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/health/**").permitAll()
+                .requestMatchers("/", "/health/**", "api/auth/**").permitAll()
                 .anyRequest().authenticated()   // 그외 요청은 인증 필요
             );
 
@@ -65,6 +71,21 @@ public class SecurityConfig {
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
             .requestMatchers(PathRequest.toH2Console())
             .requestMatchers("/error");
+    }
+
+    @Bean
+    RequestRejectedHandler requestRejectedHandler() {
+        return (request, response, ex) -> {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter()
+                .write(objectMapper.writeValueAsString(
+                    ApiResponse.of(
+                        ErrorCode.BAD_REQUEST,
+                        null,
+                        "잘못된 요청 형식입니다. URL에 허용되지 않는 문자가 포함되었습니다."))
+                );
+        };
     }
 
     @Bean

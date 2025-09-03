@@ -10,14 +10,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /* ================
@@ -158,16 +159,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ApiResponse.toEntityObject(ErrorCode.UNSUPPORTED_MEDIA_TYPE);
     }
 
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+
+        log.error("ExceptionInternal", ex);
+        return ApiResponse.toEntityObject(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
     /* ================
      * 커스텀/기타 예외
      * ================ */
+
+    @ExceptionHandler(RequestRejectedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRequestRejectedException(RequestRejectedException e) {
+        log.warn("RequestRejectedException", e);
+
+        return ApiResponse.error(ErrorCode.BAD_REQUEST);
+    }
 
     // 비즈니스 예외 → 우리가 정의한 ErrorCode 반환
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
         log.warn("BusinessException: {}", e.getMessage(), e);
 
-        return ApiResponse.error(e.getErrorCode());
+        return ApiResponse.error(e.getErrorCode(), e.getMessage());
     }
 
     // 그 외 모든 예외 → INTERNAL_SERVER_ERROR
@@ -177,5 +192,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
         return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
-
 }
