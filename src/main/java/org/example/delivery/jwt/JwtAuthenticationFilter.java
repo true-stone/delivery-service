@@ -36,10 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            if (!jwtProvider.validate(token) || jwtProvider.isRefreshToken(token)) {
-                log.debug("JWT token is invalid");
-                throw new BadCredentialsException("Invalid bearer token");
-            }
+            jwtProvider.validate(token);
 
             Authentication authentication = jwtProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
