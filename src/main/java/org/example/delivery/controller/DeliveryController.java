@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.example.delivery.common.response.ApiResponse;
 import org.example.delivery.common.response.PagingResponse;
+import org.example.delivery.dto.request.ChangeDestAddressRequest;
 import org.example.delivery.dto.response.DeliveryOrderResponse;
 import org.example.delivery.service.DeliveryService;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,10 @@ public class DeliveryController {
      * 배달 주문 수정 (도착지 주소 변경)
      */
     @PatchMapping("/{orderId}/destination")
-    public ResponseEntity<ApiResponse<Void>> changeDestination(@PathVariable Long orderId) {
+    public ResponseEntity<ApiResponse<Void>> changeDestination(
+        @PathVariable String orderId,
+        @RequestBody ChangeDestAddressRequest request) {
+        deliveryService.changeDestination(orderId, request);
         return ApiResponse.ok();
     }
 }

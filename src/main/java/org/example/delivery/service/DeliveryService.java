@@ -3,9 +3,13 @@ package org.example.delivery.service;
 import lombok.RequiredArgsConstructor;
 import org.example.delivery.common.response.PagingResponse;
 import org.example.delivery.common.response.code.ErrorCode;
+import org.example.delivery.dto.request.ChangeDestAddressRequest;
 import org.example.delivery.dto.response.DeliveryOrderResponse;
+import org.example.delivery.entity.DeliveryAddressHistory;
+import org.example.delivery.entity.DeliveryOrder;
 import org.example.delivery.entity.User;
 import org.example.delivery.exception.BusinessException;
+import org.example.delivery.repository.DeliveryAddressHistoryRepository;
 import org.example.delivery.repository.DeliveryOrderRepository;
 import org.example.delivery.repository.UserRepository;
 import org.example.delivery.util.SecurityUtils;
@@ -26,6 +30,7 @@ public class DeliveryService {
 
     private final UserRepository userRepository;
     private final DeliveryOrderRepository deliveryOrderRepository;
+    private final DeliveryAddressHistoryRepository deliveryAddressHistoryRepository;
 
     @Transactional(readOnly = true)
     public PagingResponse<DeliveryOrderResponse> getDeliveries(
@@ -64,5 +69,34 @@ public class DeliveryService {
         );
 
         return PagingResponse.of(deliveryOrderPage.map(DeliveryOrderResponse::from));
+    }
+
+    @Transactional
+    public void changeDestination(String orderId, ChangeDestAddressRequest request) {
+
+        String username = SecurityUtils.getCurrentUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(()
+            -> new UsernameNotFoundException(username));
+
+        DeliveryOrder deliveryOrder = deliveryOrderRepository.findByOrderUidAndUser_Id(orderId, user.getId())
+            .orElseThrow(() -> new BusinessException(ErrorCode.BAD_REQUEST));
+
+        String oldDestAddress = deliveryOrder.getDestAddress();
+        String newDestAddress = request.destAddress();
+
+        if (oldDestAddress.equals(newDestAddress)) {
+            return;
+        }
+
+        deliveryOrder.changeDestination(newDestAddress);
+
+        DeliveryAddressHistory history = DeliveryAddressHistory.builder()
+            .oldDestAddress(oldDestAddress)
+            .newDestAddress(newDestAddress)
+            .changedBy(user.getId())
+            .order(deliveryOrder)
+            .build();
+
+        deliveryAddressHistoryRepository.save(history);
     }
 }

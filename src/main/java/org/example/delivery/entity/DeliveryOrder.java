@@ -6,7 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.delivery.code.DeliveryStatus;
+import org.example.delivery.common.response.code.ErrorCode;
+import org.example.delivery.exception.BusinessException;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 
@@ -14,9 +17,10 @@ import java.time.LocalDateTime;
 @Getter
 @Comment("배달 주문 정보")
 @Table(name = "delivery_order")
+@DynamicUpdate
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryOrder extends BaseTimeEntity {
-    // 20250831863218990031
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("배달 주문 정보 내부 식별자")
@@ -61,6 +65,10 @@ public class DeliveryOrder extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @Builder
     public DeliveryOrder(String orderUid, DeliveryStatus status, String pickupAddress, String destAddress, int changeCount, LocalDateTime paidAt, LocalDateTime acceptedAt, LocalDateTime pickedUpAt, LocalDateTime deliveredAt, User user) {
         this.orderUid = orderUid;
@@ -85,4 +93,16 @@ public class DeliveryOrder extends BaseTimeEntity {
             default -> false;
         };
     }
+
+    public void changeDestination(String newAddress) {
+        if (!isDestinationChangeable()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "변경이 불가능한 상태입니다.");
+        }
+        if (newAddress == null || newAddress.isBlank()) {
+            throw new IllegalArgumentException("목적지 주소는 필수 입니다.");
+        }
+        this.destAddress = newAddress;
+        this.changeCount += 1;
+    }
+
 }
