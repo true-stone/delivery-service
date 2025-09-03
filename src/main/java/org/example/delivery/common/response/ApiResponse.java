@@ -20,7 +20,7 @@ public class ApiResponse<T> {
     /**
      * 코드에 대한 정적 설명 (ex: "요청 성공", "서버 오류")
      */
-    private String description;
+    private String desc;
 
     /**
      * 상황별 상세 메시지
@@ -40,7 +40,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> of(ResponseCode rc, T data, String message) {
         return ApiResponse.<T>builder()
             .code(rc.getCode())
-            .description(rc.getDescription())
+            .desc(rc.getDescription())
             .message(message)
             .data(data)
             .build();
@@ -79,12 +79,16 @@ public class ApiResponse<T> {
      * ========================= */
 
     // ✅ Success
+    public static <T> ResponseEntity<ApiResponse<T>> ok() {
+        return toEntity(SuccessCode.OK, null);
+    }
+
     public static <T> ResponseEntity<ApiResponse<T>> ok(T data) {
         return toEntity(SuccessCode.OK, data);
     }
 
-    public static <T> ResponseEntity<ApiResponse<T>> created(T data) {
-        return toEntity(SuccessCode.CREATED, data);
+    public static <T> ResponseEntity<ApiResponse<T>> created() {
+        return toEntity(SuccessCode.CREATED, null);
     }
 
     public static ResponseEntity<ApiResponse<Void>> noContent() {
