@@ -66,7 +66,7 @@ public class SecurityConfig {
 
             // 엔드포인트 권한 설정
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/health/**", "api/auth/**").permitAll()
+                .requestMatchers("/", "/swagger-ui/index.html", "/health/**", "api/auth/**").permitAll()
                 .anyRequest().authenticated()   // 그외 요청은 인증 필요
             );
 
@@ -78,7 +78,7 @@ public class SecurityConfig {
         return web -> web.ignoring()
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
             .requestMatchers(PathRequest.toH2Console())
-            .requestMatchers("/error");
+            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/error");
     }
 
     @Bean
