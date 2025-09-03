@@ -28,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
         log.debug("JwtAuthenticationFilter.doFilterInternal");
+        System.out.println("request.getRequestURI() = " + request.getRequestURI());
 
         String token = jwtProvider.resolveToken(request);
         if (!StringUtils.hasText(token)) {
@@ -54,5 +55,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
             entryPoint.commence(request, response, new BadCredentialsException("Invalid token", e));
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String uri = request.getRequestURI();
+        // TODO SecurityConfig 와 공통으로 관리할 필요가 있음
+        return uri.startsWith("/auth")
+            || uri.startsWith("/health")
+            || uri.startsWith("/h2-console")
+            || uri.startsWith("/swagger-ui")
+            || uri.startsWith("/v3/api-docs");
     }
 }
