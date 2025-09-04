@@ -45,6 +45,10 @@ security:
     access-ttl-minutes: 30
     refresh-ttl-days: 14
 
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
 logging:
   level:
     root: info

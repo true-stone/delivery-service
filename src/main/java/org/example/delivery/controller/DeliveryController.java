@@ -1,5 +1,7 @@
 package org.example.delivery.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/deliveries")
 @RequiredArgsConstructor
+@Tag(name = "배달", description = "배달 관련 API")
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
@@ -23,6 +26,7 @@ public class DeliveryController {
     /**
      * 배달 목록 조회
      */
+    @Operation(summary = "배달 목록 조회 API", description = "회원이 배달한 정보를 목록으로 조회합니다.")
     @Valid
     @GetMapping
     public ResponseEntity<ApiResponse<PagingResponse<DeliveryOrderResponse>>> getDeliveries(
@@ -37,6 +41,7 @@ public class DeliveryController {
     /**
      * 배달 주문 수정 (도착지 주소 변경)
      */
+    @Operation(summary = "배달 도착지 주소 변경 API", description = "회원의 배달 도착지 주소를 변경합니다.")
     @PatchMapping("/{orderId}/destination")
     public ResponseEntity<ApiResponse<Void>> changeDestination(
         @PathVariable String orderId,

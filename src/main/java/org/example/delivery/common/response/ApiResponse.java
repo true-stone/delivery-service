@@ -1,6 +1,7 @@
 package org.example.delivery.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.delivery.common.response.code.ErrorCode;
@@ -8,30 +9,40 @@ import org.example.delivery.common.response.code.ResponseCode;
 import org.example.delivery.common.response.code.SuccessCode;
 import org.springframework.http.ResponseEntity;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 @Getter
 @Builder
+@Schema(description = "공통 응답")
 public class ApiResponse<T> {
 
     /**
      * 비즈니스 코드 (ex: 20000000, 50000000)
      */
+    @Schema(
+        description = "8자리의 상태 코드<br>"
+            +"XXX(HTTP_STATUS_CODE), XX(SERVICE_CODE), XXX(CUSTOM_CODE)",
+        requiredMode = REQUIRED)
     private String code;
 
     /**
      * 코드에 대한 정적 설명 (ex: "요청 성공", "서버 오류")
      */
+    @Schema(description = "코드에 대한 설명", requiredMode = REQUIRED)
     private String desc;
 
     /**
      * 상황별 상세 메시지
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "상태 코드 설명 외 추가 메세지")
     private String message;
 
     /**
      * 실제 응답 데이터
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "응답 데이터")
     private T data;
 
     /* =========================
